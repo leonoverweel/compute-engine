@@ -1,0 +1,74 @@
+load("@org_tensorflow//tensorflow:tensorflow.bzl", "pybind_extension")
+
+package(
+    default_visibility = ["//visibility:public"],
+    licenses = ["notice"],  # Apache 2.0
+)
+
+cc_library(
+    name = "quantize_model",
+    srcs = [
+        "quantize_model.cc",
+    ],
+    hdrs = [
+        "quantize_model.h",
+    ],
+    deps = [
+        "//larq_compute_engine/mlir:larq_compute_engine",
+        "//larq_compute_engine/mlir:larq_compute_engine_optimize",
+        "@com_google_absl//absl/strings",
+        "@llvm-project//llvm:support",
+        "@llvm-project//mlir:IR",
+        "@llvm-project//mlir:Pass",
+        "@org_tensorflow//tensorflow/compiler/mlir/lite:common",
+        "@org_tensorflow//tensorflow/compiler/mlir/lite:flatbuffer_translate_lib",
+        "@org_tensorflow//tensorflow/compiler/mlir/lite:tensorflow_lite_quantize",
+        "@org_tensorflow//tensorflow/compiler/mlir/lite/quantization:quantization_config",
+        "@org_tensorflow//tensorflow/compiler/mlir/tensorflow:error_util",
+        "@org_tensorflow//tensorflow/core:protos_all_cc",
+        "@org_tensorflow//tensorflow/lite:framework",
+        "@org_tensorflow//tensorflow/lite/core/api",
+        "@org_tensorflow//tensorflow/lite/schema:schema_fbs",
+    ],
+)
+
+pybind_extension(
+    name = "calibration_wrapper",
+    srcs = ["calibration_wrapper.cc"],
+    module_name = "calibration_wrapper_module",
+    deps = [
+        ":quantize_model",
+        "@org_tensorflow//tensorflow/lite:framework",
+        "@org_tensorflow//tensorflow/lite/c:c_api_internal",
+        "@org_tensorflow//tensorflow/lite/kernels:builtin_ops",
+        "@org_tensorflow//tensorflow/lite/python/interpreter_wrapper:numpy",
+        "@org_tensorflow//tensorflow/lite/python/interpreter_wrapper:python_error_reporter",
+        "@org_tensorflow//tensorflow/lite/python/interpreter_wrapper:python_utils",
+        #"@org_tensorflow//tensorflow/lite/tools/optimize:quantize_model",
+        "@org_tensorflow//tensorflow/lite/tools/optimize/calibration:calibration_reader",
+        "@org_tensorflow//tensorflow/lite/tools/optimize/calibration:calibrator_lib",
+        "@com_google_absl//absl/memory",
+        "//larq_compute_engine/tflite/kernels:lce_op_kernels",
+        "@pybind11",
+    ],
+)
+
+py_library(
+    name = "calibrator",
+    srcs = ["calibrator.py"],
+    deps = [
+        ":calibration_wrapper",
+    ],
+)
+
+py_test(
+    name = "calibrator_test",
+    srcs = ["calibrator_test.py"],
+    deps = [
+        ":calibrator",
+    ],
+)
+
+exports_files([
+    "optimize/calibrator.py",
+])
