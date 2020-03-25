@@ -105,6 +105,21 @@ cc_library(
     alwayslink = 1,
 )
 
+cc_library(
+    name = "larq_compute_engine_sanitize",
+    srcs = [
+        "transforms/sanitize.cc",
+    ],
+    hdrs = [
+        "transforms/passes.h",
+        "transforms/utils.h",
+    ],
+    deps = [
+        ":larq_compute_engine",
+    ],
+    alwayslink = 1,
+)
+
 # This is part of @org_tensorflow//tensorflow/compiler/mlir/tensorflow:tf_dialect_passes
 # which includes a lot of unnecessary dependencies. We extract this single
 # target to keep binary size and build time manageable.

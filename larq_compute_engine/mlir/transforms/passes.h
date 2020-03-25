@@ -12,6 +12,9 @@ std::unique_ptr<OpPassBase<FuncOp>> CreatePrepareLCEPass();
 // Creates an instance of the TensorFlow dialect OptimizeLCE pass.
 std::unique_ptr<OpPassBase<FuncOp>> CreateOptimizeLCEPass();
 
+// Creates an instance of SanitizeLCE pass.
+std::unique_ptr<OpPassBase<FuncOp>> CreateSanitizeLCEPass();
+
 }  // namespace TFL
 }  // namespace mlir
 
