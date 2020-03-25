@@ -1,25 +1,17 @@
-#include <memory>
 #include <sstream>
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "larq_compute_engine/mlir/optimize/quantize_model.h"
 #include "larq_compute_engine/tflite/kernels/lce_ops_register.h"
 #include "pybind11/numpy.h"
 #include "pybind11/pybind11.h"
-#include "pybind11/pytypes.h"
-#include "pybind11/stl.h"
-//#include "tensorflow/compiler/mlir/lite/quantization/lite/quantize_model.h"
-#include "quantize_model.h"
-#include "tensorflow/lite/c/c_api_internal.h"
 #include "tensorflow/lite/interpreter.h"
 #include "tensorflow/lite/kernels/register.h"
-#include "tensorflow/lite/model.h"
 #include "tensorflow/lite/python/interpreter_wrapper/numpy.h"
 #include "tensorflow/lite/python/interpreter_wrapper/python_error_reporter.h"
-#include "tensorflow/lite/python/interpreter_wrapper/python_utils.h"
 #include "tensorflow/lite/tools/optimize/calibration/calibration_reader.h"
 #include "tensorflow/lite/tools/optimize/calibration/calibrator.h"
-//#include "tensorflow/lite/tools/optimize/quantize_model.h"
 
 #define TFLITE_PY_CHECK(x)                                \
   if ((x) != kTfLiteOk) {                                 \
@@ -54,8 +46,6 @@ class CalibrationWrapper {
 
   py::bytes QuantizeModel(int input_py_type, int output_py_type,
                           bool allow_float);
-
-  py::bytes GetCalibrated();
 
  private:
   bool SetTensor(int index,
@@ -228,30 +218,13 @@ py::bytes CalibrationWrapper::QuantizeModel(int input_py_type,
   reader_->AddCalibrationToModel(tflite_model.get(), /*update=*/false);
   flatbuffers::FlatBufferBuilder builder;
   auto status = kTfLiteOk;
-#if 1
   status = mlir::lite::QuantizeModel(
       *tflite_model, TfLiteTypeToSchemaType(input_type),
       TfLiteTypeToSchemaType(output_type), {}, allow_float, &builder,
       error_reporter_.get());
-#else
-  status = tflite::optimize::QuantizeModel(
-      &builder, tflite_model.get(), TfLiteTypeToSchemaType(input_type),
-      TfLiteTypeToSchemaType(output_type), allow_float, error_reporter_.get());
-#endif
 
   TFLITE_PY_CHECK(status);
 
-  return pybind11::bytes(
-      reinterpret_cast<const char*>(builder.GetCurrentBufferPointer()),
-      builder.GetSize());
-}
-
-py::bytes CalibrationWrapper::GetCalibrated() {
-  auto tflite_model = CreateMutableModel(*model_->GetModel());
-  reader_->AddCalibrationToModel(tflite_model.get(), /*update=*/false);
-  flatbuffers::FlatBufferBuilder builder;
-  auto loc = tflite::Model::Pack(builder, tflite_model.get());
-  tflite::FinishModelBuffer(builder, loc);
   return pybind11::bytes(
       reinterpret_cast<const char*>(builder.GetCurrentBufferPointer()),
       builder.GetSize());
@@ -267,6 +240,5 @@ PYBIND11_MODULE(calibration_wrapper, m) {
       .def(py::init<const py::bytes&>())
       .def("Prepare", &CalibrationWrapper::Prepare)
       .def("FeedTensor", &CalibrationWrapper::FeedTensor)
-      .def("QuantizeModel", &CalibrationWrapper::QuantizeModel)
-      .def("GetCalibrated", &CalibrationWrapper::GetCalibrated);
+      .def("QuantizeModel", &CalibrationWrapper::QuantizeModel);
 };

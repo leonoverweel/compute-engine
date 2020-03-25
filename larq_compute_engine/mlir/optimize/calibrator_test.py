@@ -13,13 +13,6 @@ def representative_dataset_gen():
         yield [np.zeros((1, 224, 224, 3), dtype=np.float32)]
 
 
-calibrated_model = calibrator.calibrate(tflite_model, representative_dataset_gen,)
-print("Saving calibrated model!")
-open(
-    "/home/tom/Plumerai/compute-engine/experiments/quantization/model_lce_calibrated.tflite",
-    "wb",
-).write(calibrated_model)
-
 converted_model = calibrator.calibrate_and_quantize(
     tflite_model, representative_dataset_gen, constants.FLOAT, constants.FLOAT, True,
 )
