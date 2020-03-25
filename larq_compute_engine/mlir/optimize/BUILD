@@ -14,10 +14,8 @@ cc_library(
         "quantize_model.h",
     ],
     deps = [
-        "//larq_compute_engine/mlir:larq_compute_engine",
-        "//larq_compute_engine/mlir:larq_compute_engine_optimize",
-        "@com_google_absl//absl/strings",
-        "@llvm-project//llvm:support",
+        "//larq_compute_engine/mlir:larq_compute_engine_sanitize",
+        "@flatbuffers",
         "@llvm-project//mlir:IR",
         "@llvm-project//mlir:Pass",
         "@org_tensorflow//tensorflow/compiler/mlir/lite:common",
@@ -25,10 +23,6 @@ cc_library(
         "@org_tensorflow//tensorflow/compiler/mlir/lite:tensorflow_lite_quantize",
         "@org_tensorflow//tensorflow/compiler/mlir/lite/quantization:quantization_config",
         "@org_tensorflow//tensorflow/compiler/mlir/tensorflow:error_util",
-        "@org_tensorflow//tensorflow/core:protos_all_cc",
-        "@org_tensorflow//tensorflow/lite:framework",
-        "@org_tensorflow//tensorflow/lite/core/api",
-        "@org_tensorflow//tensorflow/lite/schema:schema_fbs",
     ],
 )
 

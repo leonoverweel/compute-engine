@@ -1,12 +1,12 @@
 #ifndef COMPUTE_ENGINE_QUANTIZE_MODEL_H_
 #define COMPUTE_ENGINE_QUANTIZE_MODEL_H_
 
-#include <memory>
 #include <unordered_set>
 
+#include "flatbuffers/flatbuffers.h"
+#include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/core/api/error_reporter.h"
 #include "tensorflow/lite/model.h"
-#include "tensorflow/lite/schema/schema_generated.h"
 
 namespace mlir {
 namespace lite {

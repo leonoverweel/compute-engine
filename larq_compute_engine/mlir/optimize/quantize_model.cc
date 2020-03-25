@@ -1,60 +1,19 @@
-#include "quantize_model.h"
+#include "larq_compute_engine/mlir/optimize/quantize_model.h"
 
-#include "absl/strings/string_view.h"
-#include "larq_compute_engine/mlir/ir/lce_ops.h"
 #include "larq_compute_engine/mlir/transforms/passes.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/Support/Casting.h"
-#include "mlir/Dialect/QuantOps/QuantOps.h"  // TF:llvm-project
-#include "mlir/IR/Function.h"                // TF:llvm-project
-#include "mlir/IR/Location.h"                // TF:llvm-project
-#include "mlir/IR/MLIRContext.h"             // TF:llvm-project
-#include "mlir/IR/Module.h"                  // TF:llvm-project
-#include "mlir/IR/PatternMatch.h"
-#include "mlir/Pass/Pass.h"         // TF:llvm-project
-#include "mlir/Pass/PassManager.h"  // TF:llvm-project
-#include "tensorflow/compiler/mlir/lite/common/tfl_pass_config.h"
+#include "mlir/IR/MLIRContext.h"
+#include "mlir/IR/Module.h"
+#include "mlir/Pass/PassManager.h"
 #include "tensorflow/compiler/mlir/lite/flatbuffer_import.h"
 #include "tensorflow/compiler/mlir/lite/flatbuffer_translate.h"
-#include "tensorflow/compiler/mlir/lite/ir/tfl_ops.h"
 #include "tensorflow/compiler/mlir/lite/quantization/quantization_config.h"
 #include "tensorflow/compiler/mlir/lite/transforms/passes.h"
 #include "tensorflow/compiler/mlir/lite/utils/convert_type.h"
 #include "tensorflow/compiler/mlir/tensorflow/utils/error_util.h"
-#include "tensorflow/core/framework/types.pb.h"
 
 namespace mlir {
 namespace lite {
 
-struct SanitizeLCE : public RewritePattern {
-  SanitizeLCE(MLIRContext* context)
-      : RewritePattern("tfl.UNSUPPORTED_custom_LceBconv2d", 1, context) {}
-
-  PatternMatchResult match(Operation* op) const override {
-    // No need for further matches, we only care about the name
-    return matchSuccess();
-  }
-
-  void rewrite(Operation* op, PatternRewriter& rewriter) const override {
-    rewriter.replaceOpWithNewOp<TF::LceBconv2dOp>(
-        op, op->getResultTypes(), op->getOperands(), op->getAttrs());
-  }
-};
-
-struct RenameLCE : public FunctionPass<RenameLCE> {
-  void runOnFunction() override {
-    FuncOp func = getFunction();
-    OwningRewritePatternList patterns;
-    patterns.insert<SanitizeLCE>(func.getContext());
-    applyPatternsGreedily(func, patterns);
-  }
-};
-
-std::unique_ptr<OpPassBase<FuncOp>> CreateRenameLCEPass() {
-  return std::make_unique<RenameLCE>();
-}
-
-// TODO(fengliuai): check the result for `allow_float` flag.
 TfLiteStatus QuantizeModel(
     const tflite::ModelT& input_model, const tflite::TensorType& input_type,
     const tflite::TensorType& output_type,
@@ -69,8 +28,7 @@ TfLiteStatus QuantizeModel(
   }
 
   MLIRContext context;
-  StatusScopedDiagnosticHandler statusHandler(&context,
-                                              /*propagate=*/true);
+  StatusScopedDiagnosticHandler statusHandler(&context, /*propagate=*/true);
 
   // Import input_model to a MLIR module
   flatbuffers::FlatBufferBuilder input_builder;
@@ -103,14 +61,14 @@ TfLiteStatus QuantizeModel(
     quant_specs.inference_type = tensorflow::DT_QUINT8;
   }
 
-  pm.addPass(CreateRenameLCEPass());
+  pm.addPass(mlir::TFL::CreateSanitizeLCEPass());
 
   pm.addPass(TFL::CreatePrepareQuantizePass(quant_specs));
   pm.addPass(TFL::CreateQuantizePass());
   pm.addPass(TFL::CreatePostQuantizePass(emit_adaptor));
 
   // Clean up dangling LCE ops
-  pm.addPass(mlir::TFL::CreateOptimizeLCEPass());
+  pm.addPass(mlir::TFL::CreateSanitizeLCEPass());
 
   // Cleaning up the LCE ops also causes dangling quantize/dequantize ops
   // so we clean those up again
