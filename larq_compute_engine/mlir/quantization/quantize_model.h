@@ -1,5 +1,5 @@
-#ifndef COMPUTE_ENGINE_QUANTIZE_MODEL_H_
-#define COMPUTE_ENGINE_QUANTIZE_MODEL_H_
+#ifndef COMPUTE_ENGINE_MLIR_QUANTIZE_MODEL_H_
+#define COMPUTE_ENGINE_MLIR_QUANTIZE_MODEL_H_
 
 #include <unordered_set>
 
@@ -24,4 +24,4 @@ TfLiteStatus QuantizeModel(
 }  // namespace lite
 }  // namespace mlir
 
-#endif  // COMPUTE_ENGINE_QUANTIZE_MODEL_H_
+#endif  // COMPUTE_ENGINE_MLIR_QUANTIZE_MODEL_H_

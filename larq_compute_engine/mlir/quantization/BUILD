@@ -60,5 +60,5 @@ py_test(
 )
 
 exports_files([
-    "optimize/calibrator.py",
+    "quantization/calibrator.py",
 ])
