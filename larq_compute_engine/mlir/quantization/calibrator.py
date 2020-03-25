@@ -1,5 +1,5 @@
 import numpy as np
-from larq_compute_engine.mlir.optimize.calibration_wrapper import Calibrator
+from larq_compute_engine.mlir.quantization.calibration_wrapper import Calibrator
 
 
 def calibrate_and_quantize(

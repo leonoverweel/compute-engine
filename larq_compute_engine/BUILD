@@ -22,6 +22,6 @@ py_library(
     ]),
     deps = [
         "//larq_compute_engine/mlir:converter",
-        "//larq_compute_engine/mlir/optimize:calibrator",
+        "//larq_compute_engine/mlir/quantization:calibrator",
     ],
 )

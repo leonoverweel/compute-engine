@@ -1,11 +1,9 @@
 import numpy as np
-import larq_compute_engine.mlir.optimize.calibrator as calibrator
+import larq_compute_engine.mlir.quantization.calibrator as calibrator
 from tensorflow.lite.python import lite_constants as constants
 
 
-tflite_model = open(
-    "/home/tom/Plumerai/compute-engine/experiments/quantization/model_lce.tflite", "rb"
-).read()
+tflite_model = open("/tmp/quicknet_v3.tflite", "rb").read()
 
 
 def representative_dataset_gen():
@@ -18,7 +16,4 @@ converted_model = calibrator.calibrate_and_quantize(
 )
 
 print("Saving quantized model!")
-open(
-    "/home/tom/Plumerai/compute-engine/experiments/quantization/model_lce_quantized.tflite",
-    "wb",
-).write(converted_model)
+open("/tmp/quicknet_v3_quantized.tflite", "wb",).write(converted_model)

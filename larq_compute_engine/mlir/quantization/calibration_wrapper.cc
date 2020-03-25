@@ -2,7 +2,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
-#include "larq_compute_engine/mlir/optimize/quantize_model.h"
+#include "larq_compute_engine/mlir/quantization/quantize_model.h"
 #include "larq_compute_engine/tflite/kernels/lce_ops_register.h"
 #include "pybind11/numpy.h"
 #include "pybind11/pybind11.h"

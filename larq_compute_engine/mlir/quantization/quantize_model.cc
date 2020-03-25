@@ -1,4 +1,4 @@
-#include "larq_compute_engine/mlir/optimize/quantize_model.h"
+#include "larq_compute_engine/mlir/quantization/quantize_model.h"
 
 #include "larq_compute_engine/mlir/transforms/passes.h"
 #include "mlir/IR/MLIRContext.h"
