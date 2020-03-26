@@ -86,7 +86,7 @@ def test_simple_model(model_cls):
             np.testing.assert_allclose(actual_output, output, rtol=0.001, atol=0.25)
 
 
-@pytest.mark.parametrize("dtype", [np.float32, np.int8])
+@pytest.mark.parametrize("dtype", [np.float32, np.int8, np.uint8])
 def test_post_training_quantization_model(dtype):
     model = lqz.sota.QuickNet(weights="imagenet")
     model_lce = convert_keras_model(model)
