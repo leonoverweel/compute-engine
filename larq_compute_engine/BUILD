@@ -18,10 +18,8 @@ py_library(
         "__init__.py",
         "//larq_compute_engine/mlir:__init__.py",
         "//larq_compute_engine/mlir:python/__init__.py",
-        "//larq_compute_engine/mlir:optimize/__init__.py",
     ]),
     deps = [
         "//larq_compute_engine/mlir:converter",
-        "//larq_compute_engine/mlir/quantization:calibrator",
     ],
 )

@@ -189,7 +189,7 @@ py_library(
     srcs = ["python/converter.py"],
     deps = [
         ":_graphdef_tfl_flatbuffer",
-        "//larq_compute_engine/mlir/quantization:_calibration_wrapper"
+        "//larq_compute_engine/mlir/quantization:_calibration_wrapper",
     ],
 )
 
