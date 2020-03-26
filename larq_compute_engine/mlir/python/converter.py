@@ -48,6 +48,18 @@ def calibrate_and_quantize(
 ) -> bytes:
     """Use post training quantization to convert floting point operations to integer.
 
+    !!! example
+        ```python
+        def dataset_gen():
+            for _ in range(3):
+                yield [np.random.normal(size=(1, 224, 224, 3)).astype(np.float32)]
+
+        tflite_model = convert_keras_model(model)
+        tflite_model = calibrate_and_quantize(tflite_model, dataset_gen)
+        with open("/tmp/my_model.tflite", "wb") as f:
+            f.write(tflite_model)
+        ```
+
     # Arguments
     flatbuffer_model: A TFLite flatbuffer model.
     dataset_gen: An input generator that can be used to generate input samples for the
