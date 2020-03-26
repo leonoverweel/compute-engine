@@ -27,9 +27,9 @@ cc_library(
 )
 
 pybind_extension(
-    name = "calibration_wrapper",
+    name = "_calibration_wrapper",
     srcs = ["calibration_wrapper.cc"],
-    module_name = "calibration_wrapper_module",
+    module_name = "calibration_wrapper",
     deps = [
         ":quantize_model",
         "//larq_compute_engine/tflite/kernels:lce_op_kernels",
@@ -42,23 +42,3 @@ pybind_extension(
         "@pybind11",
     ],
 )
-
-py_library(
-    name = "calibrator",
-    srcs = ["calibrator.py"],
-    deps = [
-        ":calibration_wrapper",
-    ],
-)
-
-py_test(
-    name = "calibrator_test",
-    srcs = ["calibrator_test.py"],
-    deps = [
-        ":calibrator",
-    ],
-)
-
-exports_files([
-    "quantization/calibrator.py",
-])

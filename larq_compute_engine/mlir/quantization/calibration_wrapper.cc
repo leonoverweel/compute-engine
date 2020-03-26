@@ -232,7 +232,7 @@ py::bytes CalibrationWrapper::QuantizeModel(int input_py_type,
 
 using namespace tflite::calibration_wrapper;
 
-PYBIND11_MODULE(calibration_wrapper, m) {
+PYBIND11_MODULE(_calibration_wrapper, m) {
   py::class_<CalibrationWrapper>(m, "Calibrator")
       .def(py::init<const py::bytes&>())
       .def("Prepare", &CalibrationWrapper::Prepare)
