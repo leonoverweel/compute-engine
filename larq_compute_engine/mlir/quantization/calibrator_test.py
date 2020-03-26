@@ -12,7 +12,7 @@ def representative_dataset_gen():
 
 
 converted_model = calibrator.calibrate_and_quantize(
-    tflite_model, representative_dataset_gen, constants.FLOAT, constants.FLOAT, True,
+    tflite_model, representative_dataset_gen, constants.FLOAT, constants.FLOAT
 )
 
 print("Saving quantized model!")

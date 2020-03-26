@@ -44,8 +44,7 @@ class CalibrationWrapper {
 
   bool FeedTensor(const py::list& input_value);
 
-  py::bytes QuantizeModel(int input_py_type, int output_py_type,
-                          bool allow_float);
+  py::bytes QuantizeModel(int input_py_type, int output_py_type);
 
  private:
   bool SetTensor(int index,
@@ -206,8 +205,7 @@ bool CalibrationWrapper::SetTensor(
 }
 
 py::bytes CalibrationWrapper::QuantizeModel(int input_py_type,
-                                            int output_py_type,
-                                            bool allow_float) {
+                                            int output_py_type) {
   TfLiteType input_type = python_utils::TfLiteTypeFromPyType(input_py_type);
   TfLiteType output_type = python_utils::TfLiteTypeFromPyType(output_py_type);
   if (input_type == kTfLiteNoType || output_type == kTfLiteNoType) {
@@ -220,8 +218,7 @@ py::bytes CalibrationWrapper::QuantizeModel(int input_py_type,
   auto status = kTfLiteOk;
   status = mlir::lite::QuantizeModel(
       *tflite_model, TfLiteTypeToSchemaType(input_type),
-      TfLiteTypeToSchemaType(output_type), {}, allow_float, &builder,
-      error_reporter_.get());
+      TfLiteTypeToSchemaType(output_type), {}, &builder, error_reporter_.get());
 
   TFLITE_PY_CHECK(status);
 

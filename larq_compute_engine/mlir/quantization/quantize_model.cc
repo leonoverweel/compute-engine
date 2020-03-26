@@ -17,7 +17,7 @@ namespace lite {
 TfLiteStatus QuantizeModel(
     const tflite::ModelT& input_model, const tflite::TensorType& input_type,
     const tflite::TensorType& output_type,
-    const std::unordered_set<std::string>& operator_names, bool allow_float,
+    const std::unordered_set<std::string>& operator_names,
     flatbuffers::FlatBufferBuilder* builder,
     tflite::ErrorReporter* error_reporter) {
   // TODO(b/142502494): remove this restriction by improving the `emit_adaptor`
