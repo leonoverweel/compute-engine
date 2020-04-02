@@ -12,6 +12,7 @@
 #include "tensorflow/lite/python/interpreter_wrapper/python_error_reporter.h"
 #include "tensorflow/lite/tools/optimize/calibration/calibration_reader.h"
 #include "tensorflow/lite/tools/optimize/calibration/calibrator.h"
+#include "tensorflow/lite/tools/optimize/quantize_model.h"
 
 #define TFLITE_PY_CHECK(x)                                \
   if ((x) != kTfLiteOk) {                                 \
@@ -216,9 +217,16 @@ py::bytes CalibrationWrapper::QuantizeModel(int input_py_type,
   reader_->AddCalibrationToModel(tflite_model.get(), /*update=*/false);
   flatbuffers::FlatBufferBuilder builder;
   auto status = kTfLiteOk;
+#if 0
   status = mlir::lite::QuantizeModel(
       *tflite_model, TfLiteTypeToSchemaType(input_type),
       TfLiteTypeToSchemaType(output_type), {}, &builder, error_reporter_.get());
+#else
+  const bool allow_float = true;
+  status = tflite::optimize::QuantizeModel(
+      &builder, tflite_model.get(), TfLiteTypeToSchemaType(input_type),
+      TfLiteTypeToSchemaType(output_type), allow_float, error_reporter_.get());
+#endif
 
   TFLITE_PY_CHECK(status);
 
