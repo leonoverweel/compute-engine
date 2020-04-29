@@ -114,11 +114,28 @@ cc_library(
     deps = [
         ":larq_compute_engine_optimize",
         ":larq_compute_engine_prepare",
-        "@org_tensorflow//tensorflow/compiler/mlir/lite:tf_tfl_passes",
         "@org_tensorflow//tensorflow/compiler/mlir/lite:tensorflow_lite_legalize_tf",
         "@org_tensorflow//tensorflow/compiler/mlir/lite:tensorflow_lite_optimize",
+        "@org_tensorflow//tensorflow/compiler/mlir/lite:tf_tfl_passes",
         "@org_tensorflow//tensorflow/compiler/mlir/tensorflow:decode_constant_pass",
         "@org_tensorflow//tensorflow/compiler/mlir/tensorflow:tensorflow_passes",
+    ],
+)
+
+# On MacOS, when we have `//tensorflow/compiler/mlir/tensorflow:tf_dialect_lib`
+# as a dependency of `_graphdef_tfl_flatbuffer` it takes a very long time to
+# compile, and especially to link. This is because it includes all of the
+# TensorFlow CPU kernels in its dependencies.
+#     Here, we create a shared library object out of `tf_dialect_lib` so that
+# we only have to perform linking once, and don't have to re-link the CPU
+# kernels on every re-compile of `_graphdef_tfl_flatbuffer`.
+cc_binary(
+    name = "tf_dialect_lib.so",
+    linkshared = 1,
+    deps = [
+        "@llvm-project//mlir:AllPassesAndDialects",
+        "@org_tensorflow//tensorflow/compiler/mlir/tensorflow:tensorflow_dialect_registration",
+        "@org_tensorflow//tensorflow/compiler/mlir/tensorflow:tf_dialect_passes",
     ],
 )
 
@@ -138,6 +155,7 @@ pybind_extension(
     module_name = "graphdef_tfl_flatbuffer",
     deps = [
         ":lce_tfl_passes",
+        ":tf_dialect_lib.so",
         "@org_tensorflow//tensorflow/compiler/mlir/lite:flatbuffer_export",
         "@org_tensorflow//tensorflow/compiler/mlir/lite:tensorflow_lite",
         "@org_tensorflow//tensorflow/compiler/mlir/tensorflow:convert_graphdef",
@@ -145,8 +163,6 @@ pybind_extension(
         "@org_tensorflow//tensorflow/compiler/mlir/tensorflow:mlir_roundtrip_flags",
         "@org_tensorflow//tensorflow/core:ops",
         "@pybind11",
-        "@org_tensorflow//tensorflow/compiler/mlir/tensorflow:tf_dialect_lib",
-        "@org_tensorflow//tensorflow/compiler/mlir/tensorflow:tf_dialect_passes",
     ],
 )
 
