@@ -85,14 +85,14 @@ void AddTFToLCETFLConversionPasses(
   pass_manager->addPass(mlir::tf_saved_model::CreateFreezeGlobalTensorsPass());
 
   // Inject Larq Compute Engine Ops
-  // pass_manager->addPass(mlir::TFL::CreatePrepareLCEPass());
+  pass_manager->addPass(mlir::TFL::CreatePrepareLCEPass());
   // Prepare for TFLite dialect, rerun canonicalization, and then legalize to
   // the TFLite dialect.
   pass_manager->addPass(mlir::TFL::CreatePrepareTFPass(true));
   pass_manager->addNestedPass<mlir::FuncOp>(mlir::createCanonicalizerPass());
   pass_manager->addPass(mlir::TFL::CreateLegalizeTFPass(true));
   pass_manager->addPass(mlir::TFL::CreateOptimizePass());
-  // pass_manager->addPass(mlir::TFL::CreateOptimizeLCEPass());
+  pass_manager->addPass(mlir::TFL::CreateOptimizeLCEPass());
   // This pass operates on TensorFlow ops but is triggered after legalization
   // so that it can target constants introduced once TensorFlow Identity ops
   // are removed during legalization.
@@ -112,6 +112,13 @@ void AddTFToLCETFLConversionPasses(
   // completed.
   if (quant_specs.RunPropagationAndRewriteQuantizationPasses()) {
     AddQuantizationPasses(quant_specs, pass_manager);
+    // Cleanup dead LCE ops
+    // TODO: We don't need the whole pass, we just need to run CleanupDeadOps
+    pass_manager->addPass(mlir::TFL::CreateOptimizeLCEPass());
+    bool emit_quant_adaptor_ops =
+        quant_specs.inference_type != quant_specs.inference_input_type;
+    pass_manager->addPass(
+        mlir::TFL::CreatePostQuantizePass(emit_quant_adaptor_ops));
   }
 }
 

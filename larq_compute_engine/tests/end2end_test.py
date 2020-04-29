@@ -115,6 +115,46 @@ def quant_fcnn(**kwargs):
     return tfmot.quantization.keras.quantize_model(fcnn)
 
 
+def quant(x):
+    return tf.quantization.fake_quant_with_min_max_vars(x, -3.0, 3.0)
+
+
+def baseline_model(**kwargs):
+    img = tf.keras.layers.Input(shape=(32, 32, 3))
+    x = img
+    x = lq.layers.QuantConv2D(
+        12, 3, input_quantizer=quant, kernel_quantizer=quant, activation="relu"
+    )(x)
+    x = lq.layers.QuantConv2D(
+        12, 3, input_quantizer=quant, kernel_quantizer=quant, activation="relu"
+    )(x)
+    x = quant(x)
+    x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    x = lq.layers.QuantDense(
+        10, input_quantizer=quant, kernel_quantizer=quant, activation=quant
+    )(x)
+    x = tf.keras.layers.Activation("softmax")(x)
+    return tf.keras.Model(img, x)
+
+
+def binary_model(**kwargs):
+    img = tf.keras.layers.Input(shape=(32, 32, 3))
+    x = img
+    x = quant(x)
+    x = lq.layers.QuantConv2D(
+        12, 3, input_quantizer="ste_sign", kernel_quantizer="ste_sign", activation=quant
+    )(x)
+    x = lq.layers.QuantConv2D(
+        12, 3, input_quantizer="ste_sign", kernel_quantizer="ste_sign", activation=quant
+    )(x)
+    x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    x = lq.layers.QuantDense(
+        10, input_quantizer=quant, kernel_quantizer=quant, activation=quant
+    )(x)
+    x = tf.keras.layers.Activation("softmax")(x)
+    return tf.keras.Model(img, x)
+
+
 def feathernet(**kwargs):
     with tfmot.quantization.keras.quantize_scope():
         return tf.keras.models.load_model("/tmp/feathernet_quantized.h5")
@@ -125,13 +165,13 @@ def preprocess(data):
 
 
 @pytest.mark.parametrize(
-    "model_cls", [quant_toy],
+    "model_cls", [binary_model],
 )
 def test_simple_model(model_cls):
     model = model_cls(weights=None)
     model_lce = convert_keras_model(model)
 
-    with open("/tmp/testfcnn.tflite", "wb") as f:
+    with open("/tmp/testmodel.tflite", "wb") as f:
         f.write(model_lce)
 
     # # Test on the flowers dataset

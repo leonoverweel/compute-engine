@@ -86,13 +86,14 @@ def convert_keras_model(model: tf.keras.Model) -> bytes:
 
     # Run a constant folding using grappler since we currently don't implement
     # folding for LCE custom ops
-    # graph_def = run_graph_optimizations(
-    #     graph_def,
-    #     input_tensors,
-    #     output_tensors,
-    #     config=get_grappler_config(["constfold"]),
-    #     graph=frozen_func.graph,
-    # )
+    # TODO: Check if running grappler here destroy 8-bit quantization stats
+    graph_def = run_graph_optimizations(
+        graph_def,
+        input_tensors,
+        output_tensors,
+        config=get_grappler_config(["constfold"]),
+        graph=frozen_func.graph,
+    )
     with open("/tmp/testmodel.pb", "wb") as f:
         f.write(graph_def.SerializeToString())
 
