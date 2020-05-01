@@ -1,4 +1,6 @@
-include "tensorflow/compiler/mlir/lite/transforms/prepare_patterns.td"
+include "mlir/Dialect/StandardOps/IR/Ops.td"
+include "tensorflow/compiler/mlir/lite/ir/tfl_ops.td"
+include "tensorflow/compiler/mlir/tensorflow/ir/tf_ops.td"
 include "larq_compute_engine/mlir/ir/lce_ops.td"
 
 
@@ -26,6 +28,7 @@ class I32VectorElementsAttr<int len> : ElementsAttrBase<
 class GetConstantVector<string val> : NativeCodeCall<"GetConstantVector($0, " # val # ")">;
 def BinaryFilter : Constraint<CPred<"IsBinaryFilter($0)">>;
 def GetScaleVector : NativeCodeCall<"GetScaleVector($0)">;
+def IsDataFormatNHWC : ConstantAttr<TF_ConvnetDataFormatAttr, "NHWC">;
 
 def : Pat<(TF_Conv2DOp (TF_LceBsignOp $input), (ConstantOp $filter), $strides, $use_cudnn,
                        $padding, $explicit_padding, IsDataFormatNHWC: $data_format, $dilations),

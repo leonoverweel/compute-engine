@@ -1,3 +1,4 @@
+#include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/IR/PatternMatch.h"
 #include "mlir/Pass/Pass.h"
 #include "tensorflow/compiler/mlir/tensorflow/ir/tf_ops.h"

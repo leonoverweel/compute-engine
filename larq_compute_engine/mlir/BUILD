@@ -29,6 +29,7 @@ gentbl(
     td_file = "transforms/op_removal_patterns.td",
     td_srcs = [
         "@org_tensorflow//tensorflow/compiler/mlir/tensorflow:tensorflow_ops_td_files",
+        "@llvm-project//mlir:StdOpsTdFiles",
     ],
 )
 
@@ -41,9 +42,8 @@ gentbl(
     td_file = "transforms/prepare_patterns.td",
     td_srcs = [
         "ir/lce_ops.td",
-        # If we remove the dependency on lite:transforms/prepare_patterns.td  we can probably reduce the number of files
-        "@org_tensorflow//tensorflow/compiler/mlir/lite:transforms/prepare_patterns.td",
-        "@org_tensorflow//tensorflow/compiler/mlir/tensorflow:tensorflow_optimize_td_files",
+        "@llvm-project//mlir:StdOpsTdFiles",
+        "@org_tensorflow//tensorflow/compiler/mlir/tensorflow:tensorflow_ops_td_files",
         "@org_tensorflow//tensorflow/compiler/mlir/lite:tensorflow_lite_ops_td_files",
     ],
 )
@@ -91,6 +91,7 @@ cc_library(
     ],
     deps = [
         "@org_tensorflow//tensorflow/compiler/mlir/tensorflow",
+        "@llvm-project//mlir:StandardOps",
     ],
     alwayslink = 1,
 )
@@ -108,8 +109,8 @@ cc_library(
     deps = [
         ":larq_compute_engine",
         "@org_tensorflow//tensorflow/compiler/mlir/lite:tensorflow_lite",
-        "@org_tensorflow//tensorflow/compiler/mlir/lite/quantization:quantization_lib",
         "@org_tensorflow//tensorflow/compiler/mlir/tensorflow",
+        "@llvm-project//mlir:StandardOps",
     ],
     alwayslink = 1,
 )

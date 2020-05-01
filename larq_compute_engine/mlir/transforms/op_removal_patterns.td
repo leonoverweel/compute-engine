@@ -1,4 +1,13 @@
+include "mlir/Dialect/StandardOps/IR/Ops.td"
 include "tensorflow/compiler/mlir/tensorflow/ir/tf_ops.td"
+
+def NonOpaqueElementsAttr : ElementsAttrBase<
+  CPred<"!$_self.isa<OpaqueElementsAttr>()">,
+  "non-opaque constant tensor">;
+
+// Convert to std constant for statically shaped, non-opaque constants.
+def : Pat<(TF_ConstOp:$res NonOpaqueElementsAttr:$value), (ConstantOp $value),
+          [(AnyStaticShapeTensor $res)]>;
 
 // Partially supported in TFLite, treated as passthrough IdentityOp
 def : Pat<(TF_CheckNumericsOp $arg, $msg), (TF_IdentityOp $arg)>;

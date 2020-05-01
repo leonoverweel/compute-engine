@@ -1,9 +1,8 @@
 #include "larq_compute_engine/mlir/ir/lce_ops.h"
 #include "larq_compute_engine/mlir/transforms/utils.h"
+#include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/Pass/Pass.h"
 #include "tensorflow/compiler/mlir/lite/ir/tfl_ops.h"
-#include "tensorflow/compiler/mlir/lite/quantization/quantization_utils.h"
-#include "tensorflow/compiler/mlir/lite/utils/validators.h"
 #include "tensorflow/compiler/mlir/tensorflow/ir/tf_ops.h"
 
 namespace mlir {
