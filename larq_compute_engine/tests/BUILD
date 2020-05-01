@@ -24,7 +24,7 @@ py_test(
     size = "large",
     srcs = ["end2end_test.py"],
     deps = [
-        # ":_end2end_verify",
+        ":_end2end_verify",
         "//larq_compute_engine/mlir:converter",
     ],
 )
