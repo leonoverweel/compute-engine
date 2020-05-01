@@ -62,10 +62,12 @@ pybind11::bytes ConvertGraphDefToTFLiteFlatBuffer(
   mlir::TFL::QuantizationSpecs quant_specs;
   if (should_quantize) {
     quant_specs.inference_type = tensorflow::DT_QINT8;
-    // quant_specs.inference_input_type = tensorflow::DT_QINT8;
-    quant_specs.input_ranges.push_back({-6.0, 6.0});
+    for (auto input_array : input_arrays) {
+      // Input inference type is DT_FLOAT, so set the default input ranges
+      // which default to mean=0.0 and std=1.0.
+      quant_specs.input_ranges.push_back({-128.0, 127.0});
+    }
   }
-  // quant_specs.default_ranges = {-6.0, 6.0};
   mlir::PassManager pm(&context);
   tensorflow::AddTFToLCETFLConversionPasses(quant_specs, &pm);
 
