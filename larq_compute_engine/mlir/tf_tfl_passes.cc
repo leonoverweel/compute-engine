@@ -5,7 +5,6 @@
 #include "mlir/Transforms/Passes.h"
 #include "tensorflow/compiler/mlir/lite/quantization/quantization_config.h"
 #include "tensorflow/compiler/mlir/lite/quantization/quantization_passes.h"
-#include "tensorflow/compiler/mlir/lite/tf_tfl_passes.h"
 #include "tensorflow/compiler/mlir/lite/transforms/passes.h"
 #include "tensorflow/compiler/mlir/tensorflow/transforms/decode_constant.h"
 #include "tensorflow/compiler/mlir/tensorflow/transforms/passes.h"
@@ -17,6 +16,20 @@ CreateTFExecutorToControlDialectConversion();
 }  // namespace mlir
 
 namespace tensorflow {
+
+void AddQuantizationPasses(const mlir::TFL::QuantizationSpecs& quant_specs,
+                           mlir::OpPassManager* pass_manager) {
+  pass_manager->addPass(mlir::TFL::CreatePrepareQuantizePass(quant_specs));
+  pass_manager->addPass(mlir::TFL::CreateQuantizePass());
+  bool emit_quant_adaptor_ops =
+      quant_specs.inference_type != quant_specs.inference_input_type;
+  pass_manager->addPass(
+      mlir::TFL::CreatePostQuantizePass(emit_quant_adaptor_ops));
+  // TODO: We don't need the whole pass, we just need to run CleanupDeadOps
+  pass_manager->addPass(mlir::TFL::CreateOptimizeLCEPass());
+  pass_manager->addPass(
+      mlir::TFL::CreatePostQuantizePass(emit_quant_adaptor_ops));
+}
 
 void AddTFToLCETFLConversionPasses(
     const mlir::TFL::QuantizationSpecs& quant_specs,
@@ -115,13 +128,6 @@ void AddTFToLCETFLConversionPasses(
   // completed.
   if (quant_specs.RunPropagationAndRewriteQuantizationPasses()) {
     AddQuantizationPasses(quant_specs, pass_manager);
-    // Cleanup dead LCE ops
-    // TODO: We don't need the whole pass, we just need to run CleanupDeadOps
-    pass_manager->addPass(mlir::TFL::CreateOptimizeLCEPass());
-    bool emit_quant_adaptor_ops =
-        quant_specs.inference_type != quant_specs.inference_input_type;
-    pass_manager->addPass(
-        mlir::TFL::CreatePostQuantizePass(emit_quant_adaptor_ops));
   }
 }
 
