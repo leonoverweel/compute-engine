@@ -6,6 +6,9 @@
 namespace mlir {
 namespace TFL {
 
+// Creates an instance of the TensorFlow dialect OpRemoval pass.
+std::unique_ptr<OperationPass<FuncOp>> CreateOpRemovalPass();
+
 // Creates an instance of the TensorFlow dialect PrepareLCE pass.
 std::unique_ptr<OperationPass<FuncOp>> CreatePrepareLCEPass();
 

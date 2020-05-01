@@ -21,6 +21,18 @@ gentbl(
 )
 
 gentbl(
+    name = "op_removal_lce_inc_gen",
+    tbl_outs = [
+        ("-gen-rewriters", "transforms/generated_op_removal.inc"),
+    ],
+    tblgen = "@llvm-project//mlir:mlir-tblgen",
+    td_file = "transforms/op_removal_patterns.td",
+    td_srcs = [
+        "@org_tensorflow//tensorflow/compiler/mlir/tensorflow:tensorflow_ops_td_files",
+    ],
+)
+
+gentbl(
     name = "prepare_lce_inc_gen",
     tbl_outs = [
         ("-gen-rewriters", "transforms/generated_prepare.inc"),
@@ -60,6 +72,21 @@ cc_library(
     ],
     hdrs = [
         "ir/lce_ops.h",
+        "transforms/passes.h",
+    ],
+    deps = [
+        "@org_tensorflow//tensorflow/compiler/mlir/tensorflow",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "larq_compute_engine_op_removal",
+    srcs = [
+        "transforms/generated_op_removal.inc",
+        "transforms/op_removal.cc",
+    ],
+    hdrs = [
         "transforms/passes.h",
     ],
     deps = [
@@ -114,6 +141,7 @@ cc_library(
     deps = [
         ":larq_compute_engine_optimize",
         ":larq_compute_engine_prepare",
+        ":larq_compute_engine_op_removal",
         "@org_tensorflow//tensorflow/compiler/mlir/lite:tensorflow_lite_legalize_tf",
         "@org_tensorflow//tensorflow/compiler/mlir/lite:tensorflow_lite_optimize",
         "@org_tensorflow//tensorflow/compiler/mlir/lite:tf_tfl_passes",

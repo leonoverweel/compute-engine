@@ -72,6 +72,9 @@ void AddTFToLCETFLConversionPasses(
 
   // TODO(jpienaar): Revise post dialect constants.
   pass_manager->addPass(mlir::TF::CreateDecodeConstantPass());
+  // Remove passthrough ops early so constant folding can happen before
+  // LCE ops are injected
+  pass_manager->addPass(mlir::TFL::CreateOpRemovalPass());
   // Canonicalization includes const folding, which is utilized here to optimize
   // away ops that can't get constant folded after PrepareTF pass. For example,
   // tf.Conv2D is split into tf.Transpose and tfl.Conv2D.
